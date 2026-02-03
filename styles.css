@@ -1,0 +1,81 @@
+/* ========================================================================
+   PROJECT MAGMA - STYLES
+   Version 2.1 - Complete Stylesheet
+   ======================================================================== */
+
+/* This file is intentionally minimal as most styles are injected by content.js */
+
+/* Base styles for code block containers */
+pre {
+  position: relative;
+}
+
+/* Ensure modals appear above everything */
+.magma-modal {
+  position: fixed !important;
+  z-index: 999999 !important;
+}
+
+/* Additional modal input styles */
+.magma-input,
+.magma-textarea {
+  width: 100%;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1.5px solid rgba(255, 69, 0, 0.3);
+  border-radius: 6px;
+  color: #eee;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.magma-input:focus,
+.magma-textarea:focus {
+  outline: none;
+  border-color: #ff4500;
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);
+}
+
+.magma-textarea {
+  resize: vertical;
+  font-family: 'Courier New', monospace;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ff4500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Scrollbar styling for modal content */
+.magma-modal-body::-webkit-scrollbar,
+.magma-folder-tree::-webkit-scrollbar {
+  width: 8px;
+}
+
+.magma-modal-body::-webkit-scrollbar-track,
+.magma-folder-tree::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.magma-modal-body::-webkit-scrollbar-thumb,
+.magma-folder-tree::-webkit-scrollbar-thumb {
+  background: rgba(255, 69, 0, 0.5);
+  border-radius: 4px;
+}
+
+.magma-modal-body::-webkit-scrollbar-thumb:hover,
+.magma-folder-tree::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 69, 0, 0.7);
+}

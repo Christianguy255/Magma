@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Magma Control Panel</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 400px;
+      min-height: 500px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a0000 0%, #2b0808 50%, #1a0000 100%);
+      color: #eeeeee;
+      padding: 0;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Diagonal slash overlay - hidden by default */
+    #slash-overlay {
+      position: fixed;
+      top: -10%;
+      left: -10%;
+      width: 0%;
+      height: 150%;
+      background: linear-gradient(45deg,
+          transparent 0%,
+          #ff4500 40%,
+          #ff6a00 50%,
+          #ff4500 60%,
+          transparent 100%);
+      transform: rotate(-15deg);
+      opacity: 0;
+      z-index: 9999;
+      pointer-events: none;
+      box-shadow: 0 0 50px rgba(255, 69, 0, 0.8);
+    }
+
+    /* Header */
+    .header {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 25px 20px;
+      text-align: center;
+      border-bottom: 2px solid rgba(255, 69, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #ff4500;
+      text-shadow: 0 0 20px rgba(255, 69, 0, 0.6);
+      letter-spacing: 3px;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: #00ffcc;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    /* Main content */
+    #app-container {
+      padding: 25px 20px;
+    }
+
+    /* Views */
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* Setup view */
+    #setup-view {
+      text-align: center;
+    }
+
+    #setup-view p {
+      margin: 20px 0;
+      line-height: 1.6;
+      color: #cccccc;
+      font-size: 14px;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 16px 20px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.4s, height 0.4s;
+    }
+
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff4500, #ff6a00);
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 69, 0, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #333333, #555555);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #00ffcc, #00bcd4);
+      color: #000;
+      box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Input groups */
+    .input-group {
+      margin: 20px 0;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #ff4500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-group input,
+    .input-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid rgba(255, 69, 0, 0.3);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #eeeeee;
+      font-size: 13px;
+      font-family: 'Courier New', monospace;
+      transition: all 0.3s ease;
+    }
+
+    .input-group input:focus,
+    .input-group textarea:focus {
+      outline: none;
+      border-color: #ff4500;
+      background: rgba(0, 0, 0, 0.8);
+      box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);
+    }
+
+    .input-group textarea {
+      resize: vertical;
+      min-height: 100px;
+      max-height: 200px;
+    }
+
+    /* Status display */
+    #status-display {
+      margin: 20px 0;
+      padding: 16px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      border-left: 4px solid #ff4500;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      color: #eeeeee;
+      min-height: 60px;
+      max-height: 150px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    #status-display.success {
+      border-left-color: #00ff00;
+      color: #00ff00;
+    }
+
+    #status-display.error {
+      border-left-color: #ff0000;
+      color: #ff0000;
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .stat-card {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid rgba(255, 69, 0, 0.2);
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: #ff4500;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #aaaaaa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Settings section */
+    .settings-section {
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 69, 0, 0.2);
+    }
+
+    .settings-section h3 {
+      font-size: 14px;
+      color: #ff6a00;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Helper text */
+    .helper-text {
+      font-size: 11px;
+      color: #999999;
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    /* Hidden class */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 69, 0, 0.5);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 69, 0, 0.7);
+    }
+
+    /* Version footer */
+    .version-footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 10px;
+      color: #666666;
+      border-top: 1px solid rgba(255, 69, 0, 0.1);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="slash-overlay"></div>
+
+  <div class="header">
+    <h1>🌋 MAGMA</h1>
+    <p class="subtitle">🔥 Powered by CometAPI (500+ AI Models)</p>
+  </div>
+
+  <div id="app-container">
+
+    <!-- Setup View -->
+    <div id="setup-view" class="view active">
+      <p>
+        Project Magma transforms your AI coding experience with intelligent code auditing,
+        virtual filesystem management, and immersive visual effects.
+      </p>
+
+      <div class="input-group">
+        <label>CometAPI Key</label>
+        <input type="password" id="api-key-input" placeholder="Enter your CometAPI key (sk-xxx)">
+        <div class="helper-text">
+          Get your FREE API key (1M tokens) at <strong>cometapi.com</strong>. Access 500+ AI models!
+        </div>
+      </div>
+
+      <button id="save-key-btn" class="btn btn-secondary">💾 Save API Key</button>
+      <button id="activate-btn" class="btn btn-primary" disabled>🔥 ACTIVATE MAGMA MODE</button>
+    </div>
+
+    <!-- Main Interface -->
+    <div id="main-interface" class="view">
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="file-count">0</div>
+          <div class="stat-label">Files</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="folder-count">0</div>
+          <div class="stat-label">Folders</div>
+        </div>
+      </div>
+
+      <button id="deactivate-btn" class="btn btn-secondary">❄️ Deactivate Mode</button>
+      <button id="clear-fs-btn" class="btn btn-secondary">🗑️ Clear Filesystem</button>
+      <button id="export-json-btn" class="btn btn-success">📤 Export as JSON</button>
+
+      <div class="settings-section">
+        <h3>⚙️ Settings</h3>
+
+        <div class="input-group">
+          <label>Update API Key</label>
+          <input type="password" id="api-key-update" placeholder="Enter new API key">
+        </div>
+
+        <button id="update-key-btn" class="btn btn-secondary">💾 Update Key</button>
+        <div class="input-group">
+          <label>Active AI Engine</label>
+          <select id="model-select" class="magma-input" style="background: #1a0000; cursor: pointer;">
+            <option value="claude-opus-4-5-20251101">Claude Opus 4.5 (The Architect)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="status-display">System ready. Magma mode active!</div>
+    </div>
+
+  </div>
+
+  <div class="version-footer">
+    Project Magma v2.9.1 - Bug Fix Edition | Forged with 🔥
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
